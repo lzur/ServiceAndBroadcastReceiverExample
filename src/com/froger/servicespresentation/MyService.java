@@ -9,7 +9,7 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 public class MyService extends Service {
-
+	private static boolean serviceAlive = false;
 	private Toast myToast;
 	private int counter = 1;
 	
@@ -29,6 +29,8 @@ public class MyService extends Service {
 		super.onCreate();
 		
 		updatingTimer = new Timer();
+		updatingTimer.scheduleAtFixedRate(notify, 5*1000, 5*1000);
+		serviceAlive = true;
 		
 		myToast = Toast.makeText(getApplicationContext(), 
 								 "Service started", 
@@ -46,18 +48,13 @@ public class MyService extends Service {
 		myToast.show();
 		
 		sendMsg("Backgrund Service stopped");
-		
+		serviceAlive = false;
 		super.onDestroy();
-	}
-
-	@Override
-	public void onStart(Intent intent, int startId) {
-		super.onStart(intent, startId);
-		updatingTimer.scheduleAtFixedRate(notify, 5*1000, 5*1000);
 	}
 	
 	@Override
 	public IBinder onBind(Intent arg0) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -65,6 +62,10 @@ public class MyService extends Service {
 		Intent intent = new Intent(ClientActivity.NEW_MSG);
 		intent.putExtra("ReceiverData", msg);
 		sendBroadcast(intent);
+	}
+
+	public static boolean isServiceAlive() {
+		return serviceAlive;
 	}
 
 }

@@ -1,6 +1,10 @@
 package com.froger.servicespresentation;
 
+import java.util.List;
+
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +18,9 @@ import android.widget.TextView;
 public class ClientActivity extends Activity {
 	private Button btnStartService;
 	private Button btnStopService;
+	
+	private TextView tvServiceStatusStaticField;
+	private TextView tvServiceStatusServiceInfo;
 	
 	private TextView tvReceiverData;
 	private SampleReceiver myReceiver;
@@ -41,6 +48,8 @@ public class ClientActivity extends Activity {
         btnStartService = (Button)findViewById(R.id.btnStartService);
         btnStopService  = (Button)findViewById(R.id.btnStopService);
         tvReceiverData  = (TextView)findViewById(R.id.tvReceiverData);
+        tvServiceStatusStaticField = (TextView)findViewById(R.id.tvServiceStatusStaticField);
+        tvServiceStatusServiceInfo = (TextView)findViewById(R.id.tvServiceStatusServiceInfo);
         //Listeners
         btnStartService.setOnClickListener(startServiceListener);
         btnStopService.setOnClickListener(stopServiceListener);
@@ -48,6 +57,33 @@ public class ClientActivity extends Activity {
 		myReceiver = new SampleReceiver();
 		IntentFilter filter = new IntentFilter(NEW_MSG);
 		registerReceiver(myReceiver, filter);
+		
+		if(MyService.isServiceAlive()) 
+			tvServiceStatusStaticField
+			.setText("Service started (static field)? - true");
+		else						   
+			tvServiceStatusStaticField
+			.setText("Service started (static field)? - false");
+		
+		ActivityManager activityManager = 
+			(ActivityManager)getSystemService(ACTIVITY_SERVICE);
+		List<RunningServiceInfo> services = 
+			activityManager.getRunningServices(Short.MAX_VALUE);
+		boolean isServiceAlive = false;
+		String serviceName = MyService.class.getName();
+		
+		for (RunningServiceInfo runningServiceInfo : services) {
+			if(runningServiceInfo.service.getClassName().equals(serviceName))
+				isServiceAlive = true;
+		}
+		
+		if(isServiceAlive) 
+			tvServiceStatusServiceInfo
+			.setText("ServiceStarted? (RunningServiceInfo) - true");
+		else						   
+			tvServiceStatusServiceInfo
+			.setText("ServiceStarted? (RunningServiceInfo) - false");
+		
     }
     
 	@Override
